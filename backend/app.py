@@ -28,7 +28,25 @@ def index():
 # Api to check the connection
 @app.route('/jsonrequest')
 def jsonreques():
-    return jsonify([{"result" : "sucess"}])
+    return jsonify({
+        "result" : "sucess"
+        })
+
+
+# Api for listing all the present todos
+@app.route('/todo/all',methods=['GET'])
+def all_todos():
+    all_todos=Todo.query.filter_by(deleted=False).all()
+    list_all=[]
+    for todo in all_todos:
+        local_dict={
+            "id":todo.id,
+            "name":todo.name,
+            "completed":todo.completed,
+            "deleted":todo.deleted
+            }
+        list_all.append(local_dict)
+    return jsonify(list_all)
 
 # Api for insertion of new todo 
 @app.route('/todo/insert',methods=['POST'])
@@ -42,10 +60,73 @@ def insert():
         todo_obj=Todo(name=name)
         db.session.add(todo_obj)
         db.session.commit()
-        return jsonify({"status":"success","completed":todo_obj.completed,"deleted":todo_obj.deleted})
+        return jsonify({
+            "status":"success",
+            "completed":todo_obj.completed,
+            "deleted":todo_obj.deleted
+            })
     else :
         todo_obj=Todo.query.filter_by(name=name).first() 
-        return jsonify({"status":"already_exists","completed":todo_obj.completed,"deleted":todo_obj.deleted})
+        return jsonify({
+            "status":"already_exists",
+            "completed":todo_obj.completed,
+            "deleted":todo_obj.deleted
+            })
+
+
+#Api for completion of task
+@app.route('/todo/complete-or-not',methods=['POST'])
+def complement():
+    todo_json=request.get_json()
+    obj_completed=todo_json["completed"]
+    obj_id=todo_json["id"]
+    
+    #holding the actual databse object
+    todo_obj=Todo.query.filter_by(id=int(obj_id)).first()
+
+    #if object with provided id exist in database then make change
+    if todo_obj is not None:
+        if obj_completed == "True" or obj_completed == "true":
+            todo_obj.completed=True
+        else :
+            todo_obj.completed=False
+        db.session.commit()
+        return jsonify({
+            "status":"sucess",
+            "id":todo_obj.id,
+            "completed":todo_obj.completed
+        })
+    # if object dosn't exist in database
+    else :
+        return jsonify({
+            "status":"no-such-todo"
+        })
+
+
+#Api for soft delete of todo
+@app.route('/todo/delete',methods=['POST'])
+def delete_todo():
+    todo_json=request.get_json()
+    obj_id=todo_json["id"]
+    
+    #holding the actual databse object
+    todo_obj=Todo.query.filter_by(id=int(obj_id)).first()
+
+    #if object with provided id exist in database then soft delete it
+    if todo_obj is not None:
+        todo_obj.deleted=True
+        db.session.commit()
+        return jsonify({
+            "status":"sucess",
+            "id":todo_obj.id,
+            "deleted":todo_obj.completed
+        })
+    # if object dosn't exist in database
+    else :
+        return jsonify({
+            "status":"no-such-todo"
+        })
+
 
 if __name__=='__main__':
     app.debug=True
