@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app= Flask(__name__)
 
-
+# different database for production and devlopment
 ENV='DEV'
 if ENV == 'PROD':
     app.config['SQLALCHEMY_DATABASE_URI']= 'postgres://xkwjdpddhokzfg:8a678a487d63f4e0944d44177025f754d112ba7e305b0ef442356836df0fff0d@ec2-52-204-20-42.compute-1.amazonaws.com:5432/d4b9i9tq38h5b4'
