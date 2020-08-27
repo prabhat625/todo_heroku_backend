@@ -27,9 +27,9 @@ def index():
 
 # Api to check the connection
 @app.route('/jsonrequest')
-def jsonreques():
+def jsonrequest():
     return jsonify({
-        "result" : "sucess"
+        "success" : True
         })
 
 
@@ -61,22 +61,22 @@ def insert():
         db.session.add(todo_obj)
         db.session.commit()
         return jsonify({
-            "status":"success",
+            "success":True,
             "completed":todo_obj.completed,
             "deleted":todo_obj.deleted
             })
     else :
         todo_obj=Todo.query.filter_by(name=name).first() 
         return jsonify({
-            "status":"already_exists",
+            "success":False,
             "completed":todo_obj.completed,
             "deleted":todo_obj.deleted
             })
 
 
-#Api for completion of task
+#Api for completion or non-completion of task
 @app.route('/todo/complete-or-not',methods=['POST'])
-def complement():
+def mark_or_unmark_completed():
     todo_json=request.get_json()
     obj_completed=todo_json["completed"]
     obj_id=todo_json["id"]
@@ -86,20 +86,20 @@ def complement():
 
     #if object with provided id exist in database then make change
     if todo_obj is not None:
-        if obj_completed == "True" or obj_completed == "true":
+        if obj_completed :
             todo_obj.completed=True
         else :
             todo_obj.completed=False
         db.session.commit()
         return jsonify({
-            "status":"sucess",
+            "success":True,
             "id":todo_obj.id,
             "completed":todo_obj.completed
         })
     # if object dosn't exist in database
     else :
         return jsonify({
-            "status":"no-such-todo"
+            "success":False
         })
 
 
@@ -117,14 +117,14 @@ def delete_todo():
         todo_obj.deleted=True
         db.session.commit()
         return jsonify({
-            "status":"sucess",
+            "success":True,
             "id":todo_obj.id,
             "deleted":todo_obj.completed
         })
     # if object dosn't exist in database
     else :
         return jsonify({
-            "status":"no-such-todo"
+            "success":False
         })
 
 
