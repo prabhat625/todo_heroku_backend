@@ -9,6 +9,8 @@ if ENV == 'PROD':
     app.config['SQLALCHEMY_DATABASE_URI']= 'postgres://xkwjdpddhokzfg:8a678a487d63f4e0944d44177025f754d112ba7e305b0ef442356836df0fff0d@ec2-52-204-20-42.compute-1.amazonaws.com:5432/d4b9i9tq38h5b4'
 else :
    app.config['SQLALCHEMY_DATABASE_URI']= 'postgresql://postgres:123456@localhost/todos_main'
+   app.debug=True
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db=SQLAlchemy(app)
@@ -19,6 +21,15 @@ class Todo(db.Model):
     name=db.Column(db.String(200),nullable=False)
     deleted=db.Column(db.Boolean,default=False)
     completed=db.Column(db.Boolean,default=False)
+
+    #Return object data in serializable format
+    def serialize(self):
+        return { 
+                'id': self.id,
+                'name': self.name, 
+                'deleted': self.deleted, 
+                'completed': self.completed
+                }
 
 
 @app.route('/')
@@ -39,13 +50,7 @@ def all_todos():
     all_todos=Todo.query.filter_by(deleted=False).all()
     list_all=[]
     for todo in all_todos:
-        local_dict={
-            "id":todo.id,
-            "name":todo.name,
-            "completed":todo.completed,
-            "deleted":todo.deleted
-            }
-        list_all.append(local_dict)
+        list_all.append(todo.serialize())
     return jsonify(list_all)
 
 # Api for insertion of new todo 
@@ -60,17 +65,14 @@ def insert():
         todo_obj=Todo(name=name)
         db.session.add(todo_obj)
         db.session.commit()
+        todo_ob_id=Todo.query.filter_by(name=name).first().id
         return jsonify({
             "success":True,
-            "completed":todo_obj.completed,
-            "deleted":todo_obj.deleted
+            "id":todo_ob_id
             })
-    else :
-        todo_obj=Todo.query.filter_by(name=name).first() 
+    else : 
         return jsonify({
-            "success":False,
-            "completed":todo_obj.completed,
-            "deleted":todo_obj.deleted
+            "success":False
             })
 
 
@@ -92,9 +94,7 @@ def mark_or_unmark_completed():
             todo_obj.completed=False
         db.session.commit()
         return jsonify({
-            "success":True,
-            "id":todo_obj.id,
-            "completed":todo_obj.completed
+            "success":True
         })
     # if object dosn't exist in database
     else :
@@ -117,9 +117,7 @@ def delete_todo():
         todo_obj.deleted=True
         db.session.commit()
         return jsonify({
-            "success":True,
-            "id":todo_obj.id,
-            "deleted":todo_obj.completed
+            "success":True
         })
     # if object dosn't exist in database
     else :
@@ -129,5 +127,4 @@ def delete_todo():
 
 
 if __name__=='__main__':
-    app.debug=True
     app.run()
