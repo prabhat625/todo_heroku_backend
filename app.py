@@ -47,7 +47,7 @@ def jsonrequest():
 # Api for listing all the present todos
 @app.route('/todo/all',methods=['GET'])
 def all_todos():
-    all_todos=Todo.query.filter_by(deleted=False).all()
+    all_todos=Todo.query.filter_by(deleted=False).order_by(Todo.id.asc()).all()
     list_all=[]
     for todo in all_todos:
         list_all.append(todo.serialize())
