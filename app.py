@@ -1,7 +1,9 @@
 from flask import Flask,jsonify,request
 from flask_sqlalchemy import SQLAlchemy 
+from flask_cors import CORS
 
 app= Flask(__name__)
+CORS(app)
 
 # different database for production and devlopment
 ENV='PROD'
@@ -113,7 +115,7 @@ def delete_todo():
     if obj_id is None :
          return jsonify({
             "success":False
-        })  
+        })
     #holding the actual databse object
     todo_obj=Todo.query.filter_by(id=int(obj_id)).first()
 
