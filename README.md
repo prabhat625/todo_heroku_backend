@@ -9,3 +9,4 @@ If you are done with the basic version of the project, try making the following 
 - Add a “Delete all Todos” button, clicking on which deletes all todos.
 - As there can be hundreds or thousands of todos in the database. The deletion should be done in background using a celery task. Deploy the frontend & backend online.
 - Deploy the frontend for free on Vercel and the backend server powering the REST API can be deployed to Heroku.
+

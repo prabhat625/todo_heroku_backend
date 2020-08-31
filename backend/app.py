@@ -57,6 +57,10 @@ def all_todos():
 @app.route('/todo/insert',methods=['POST'])
 def insert():
     todo_json=request.get_json()
+    if "name" in todo_json.key():
+        return jsonify({
+            "success":False
+        })
     name=todo_json['name']
     
     #if name not present or it is deleted then add 
